@@ -252,6 +252,8 @@ public class LoadingImageView extends ImageView {
 		protected void onPostExecute(Drawable result) {
 			super.onPostExecute(result);
 			
+			// TODO: what to do if an download handler
+			// is not set. Make the exception more visible.
 			if (e != null) {
 				if (mDownloadHandler != null){
 					mDownloadHandler.onException(e);
