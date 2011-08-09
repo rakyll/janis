@@ -5,13 +5,13 @@
 package com.dogan.androidutils.views;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Handler.Callback;
+import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
@@ -22,13 +22,10 @@ import android.widget.ImageView;
  * shows the image.
  */
 public class LoadingImageView extends ImageView {
-
-	private static final int COMPLETE = 0;
-	private static final int FAILED = 1;
 	
 	private static DrawableCache mCache;
-	private Drawable mDrawable;
 	private DownloadHandler mDownloadHandler;
+	private AsyncTask<String, Boolean, Drawable> mCurrentBackgroundTask;
 	
 	
 	/**
@@ -41,15 +38,19 @@ public class LoadingImageView extends ImageView {
 	}
 
 	/**
-	 * If you will create an instance in layout XML, insert a "src"
-	 * attribute to the LoadingImageView tag and set it to the URL
+	 * If you will create an instance in layout XML, 
+	 * insert a "src" attribute to the LoadingImageView 
+	 * tag and set it to the URL
 	 * of the remote image.
-	 * E.g.: <com.dogan.androidutils.LoadingImageView src="http://.../images/...png" />
+	 * E.g.: <com.dogan.androidutils.LoadingImageView 
+	 * src="http://.../images/...png" />
 	 *
 	 * @param context the context
 	 * @param attrSet the attr set
 	 */
-	public LoadingImageView(final Context context, final AttributeSet attrSet) {
+	public LoadingImageView(final Context context, 
+			final AttributeSet attrSet) {
+		
 		super(context, attrSet);
 		final String url = attrSet.getAttributeValue(null, "src");
 		setImageUrl(url);
@@ -94,49 +95,14 @@ public class LoadingImageView extends ImageView {
 	 * @param imageUrl the url of the image you wish to load
 	 */
 	public void setImageUrl(final String imageUrl) {
-		mDrawable = null;
-		new Thread(){
-			public void run() {
-				try {
-					mDrawable = getDrawableFromUrl(imageUrl);
-					handler.sendEmptyMessage(COMPLETE);
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-					if(mDownloadHandler != null){
-						mDownloadHandler.onException(e);
-					}
-					handler.sendEmptyMessage(FAILED);
-				} catch (IOException e) {
-					e.printStackTrace();
-					if(mDownloadHandler != null){
-						mDownloadHandler.onException(e);
-					}
-					handler.sendEmptyMessage(FAILED);
-				}
-			};
-		}.start();
+		
+		if(mCurrentBackgroundTask != null){
+			mCurrentBackgroundTask.cancel(true);
+		}
+		
+		mCurrentBackgroundTask = new BackgroundTask();
+		mCurrentBackgroundTask.execute(imageUrl);
 	}
-
-	/**
-	 * Once the image is dowloaded this handler will call the
-	 * downloadHandler you provided if exists, and set the image
-	 * to the image view.
-	 *  */
-	private final Handler handler = new Handler(new Callback() {
-		public boolean handleMessage(Message msg) {
-			
-			if(mDownloadHandler != null){
-				mDownloadHandler.onDrawableDownloaded(mDrawable);
-			}
-			
-			switch (msg.what) {
-			case COMPLETE:
-				setImageDrawable(mDrawable); break;
-			}
-			return true;
-		}              
-	});
-	
 	
 	/**
 	 * Gets the drawable with the given url from cache.
@@ -181,10 +147,11 @@ public class LoadingImageView extends ImageView {
 	 *
 	 * @param url the url of the image
 	 * @return a drawable
-	 * @throws IOException
-	 * @throws MalformedURLException
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws MalformedURLException the malformed url exception
 	 */
-	private static Drawable getDrawableFromUrl(final String url) throws IOException, MalformedURLException {
+	private static Drawable getDrawableFromUrl(final String url) 
+		throws IOException, MalformedURLException {
 
 		if(url == null){
 			return null;
@@ -192,7 +159,8 @@ public class LoadingImageView extends ImageView {
 		
 		Drawable image = getFromCache(url);
 		if(image == null){
-			image = Drawable.createFromStream(((java.io.InputStream)new java.net.URL(url).getContent()), "name");
+			image = Drawable.createFromStream(((InputStream)
+					new URL(url).getContent()), "name");
 			putToCache(url, image);
 		}
 		return image;
@@ -250,5 +218,50 @@ public class LoadingImageView extends ImageView {
 		 * @param e The thrown exception during the download.
 		 */
 		void onException(Exception e);
+	}
+	
+	/**
+	 * Background task that download the image
+	 * and sets the downloaded image to this view.
+	 */
+	private class BackgroundTask 
+		extends AsyncTask<String, Boolean, Drawable>{
+		
+		private Exception e;
+
+		/* The background task to download 
+		 * the remote image as a Drawable.
+		 */
+		@Override
+		protected Drawable doInBackground(String... params) {
+			try {
+				return getDrawableFromUrl(params[0]);
+			} catch (Exception e) {
+				e.printStackTrace();
+				this.e = e;
+			} 
+			return null;
+		}
+		
+		/* When download task is finished, run the handler
+		 * callback and set the image drawable. 
+		 * If an exception is thrown while downloading
+		 * notify the handler.
+		 */
+		@Override
+		protected void onPostExecute(Drawable result) {
+			super.onPostExecute(result);
+			
+			if (e != null) {
+				if (mDownloadHandler != null){
+					mDownloadHandler.onException(e);
+				}
+			} else {
+				if (mDownloadHandler != null){
+					mDownloadHandler.onDrawableDownloaded(result);
+				}
+				setImageDrawable(result);
+			}
+		}
 	}
 }
