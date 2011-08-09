@@ -19,6 +19,7 @@ public class LoadingListView extends ListView {
 	private OnMoreHandler mOnMoreHandler;
 	private OnScrollListener mOnScrollListener;
 	private BackgroundTask mCurrentBackgroundTask;
+	final Object taskLock = new Object();
 	
 	/**
 	 * Constructs a new LoadingListView
@@ -94,20 +95,20 @@ public class LoadingListView extends ListView {
 				// perform its own onScroll
 				if(mOnScrollListener != null){
 					mOnScrollListener
-						.onScroll(view, 
-								firstVisibleItem, 
-								visibleItemCount, 
-								totalItemCount);
+						.onScroll(view, firstVisibleItem, 
+								visibleItemCount, totalItemCount);
 				}
 				
 				// If list view is reached to the bottom
 				if (getLastVisiblePosition() == (totalItemCount - 1)){
 					// start background task here
 					// if there is no pending/running task
-					if(mCurrentBackgroundTask == null
-							|| mCurrentBackgroundTask.getStatus() == Status.FINISHED){
-						mCurrentBackgroundTask = new BackgroundTask();
-						mCurrentBackgroundTask.execute();
+					synchronized (taskLock) {
+						if(mCurrentBackgroundTask == null
+								|| mCurrentBackgroundTask.getStatus() == Status.FINISHED){
+							mCurrentBackgroundTask = new BackgroundTask();
+							mCurrentBackgroundTask.execute();
+						}
 					}
 				} // end of get last visible
 			}
