@@ -26,7 +26,7 @@ public class LoadingImageView extends ImageView {
 	private static DrawableCache mCache;
 	private DownloadHandler mDownloadHandler;
 	private AsyncTask<String, Boolean, Drawable> mCurrentBackgroundTask;
-	
+	final private Object taskLock = new Object(); 
 	
 	/**
 	 * Constructs a new loading image view.
@@ -96,12 +96,17 @@ public class LoadingImageView extends ImageView {
 	 */
 	public void setImageUrl(final String imageUrl) {
 		
-		if(mCurrentBackgroundTask != null){
-			mCurrentBackgroundTask.cancel(true);
+		synchronized (taskLock) {
+			// If there exists an existing task
+			// cancel it, so only the lastly setted url
+			// forks a download task
+			if(mCurrentBackgroundTask != null){
+				mCurrentBackgroundTask.cancel(true);
+			}
+			
+			mCurrentBackgroundTask = new BackgroundTask();
+			mCurrentBackgroundTask.execute(imageUrl);
 		}
-		
-		mCurrentBackgroundTask = new BackgroundTask();
-		mCurrentBackgroundTask.execute(imageUrl);
 	}
 	
 	/**
