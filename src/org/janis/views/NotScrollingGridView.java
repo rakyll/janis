@@ -35,7 +35,7 @@ public class NotScrollingGridView extends GridView {
 		mNumCols = attrs
 			.getAttributeIntValue(null, "numColumns", 0);
 		mVerticalSpacing = attrs
-			.getAttributeIntValue(null, "mVerticalSpacing", 0);
+			.getAttributeIntValue(null, "verticalSpacing", 0);
 		
 		setNumColumns(mNumCols);
 		setVerticalSpacing(mVerticalSpacing);
