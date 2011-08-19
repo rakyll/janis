@@ -62,7 +62,7 @@ public class NotScrollingGridView extends GridView {
 
 		int height = 0;
 		int width = MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.AT_MOST);
-		int numVerticalItems = (int) Math.ceil(adapter.getCount()/mNumCols);
+		int numVerticalItems = (int) Math.ceil(adapter.getCount()/mNumCols) + 1;
 		
 		for (int i = 0; i < numVerticalItems; i++) {
 			// Create a grid item to measure height
@@ -71,7 +71,7 @@ public class NotScrollingGridView extends GridView {
 			height += itemView.getMeasuredHeight();
 		}
 		
-		int newHeight = (numVerticalItems-1) * mVerticalSpacing + height;
+		int newHeight = (2*numVerticalItems) * mVerticalSpacing + height;
 		
 		ViewGroup.LayoutParams params = getLayoutParams();
 		if(params == null){
