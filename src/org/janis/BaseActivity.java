@@ -1,4 +1,4 @@
-package com.dogan.androidutils;
+package org.janis;
 
 import java.lang.reflect.Field;
 

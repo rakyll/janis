@@ -1,7 +1,7 @@
 /*
  * @author Burcu Dogan
  */
-package com.dogan.androidutils.views;
+package org.janis.views;
 
 import android.content.Context;
 import android.util.AttributeSet;

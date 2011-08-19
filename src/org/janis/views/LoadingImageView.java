@@ -2,7 +2,7 @@
  * @author Burcu Dogan
  */
 
-package com.dogan.androidutils.views;
+package org.janis.views;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +42,7 @@ public class LoadingImageView extends ImageView {
 	 * insert a "src" attribute to the LoadingImageView 
 	 * tag and set it to the URL
 	 * of the remote image.
-	 * E.g.: <com.dogan.androidutils.LoadingImageView 
+	 * E.g.: <org.janis.LoadingImageView 
 	 * src="http://.../images/...png" />
 	 *
 	 * @param context the context
