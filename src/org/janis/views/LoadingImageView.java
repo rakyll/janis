@@ -96,6 +96,20 @@ public class LoadingImageView extends ImageView {
 	 */
 	public void setImageUrl(final String imageUrl) {
 		
+		cancelExistingDownloadTask();
+		synchronized (taskLock) {
+			// Constructs a new download task and
+			// starts downloading
+			mCurrentBackgroundTask = new BackgroundTask();
+			mCurrentBackgroundTask.execute(imageUrl);
+		}
+	}
+	
+	/**
+	 * If there is a remote image being downloaded,
+	 * this method cancels the download task
+	 */
+	public void cancelExistingDownloadTask(){
 		synchronized (taskLock) {
 			// If there exists an existing task
 			// cancel it, so only the lastly setted url
@@ -103,9 +117,6 @@ public class LoadingImageView extends ImageView {
 			if(mCurrentBackgroundTask != null){
 				mCurrentBackgroundTask.cancel(true);
 			}
-			
-			mCurrentBackgroundTask = new BackgroundTask();
-			mCurrentBackgroundTask.execute(imageUrl);
 		}
 	}
 	
