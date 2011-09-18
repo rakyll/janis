@@ -268,17 +268,33 @@ public class LoadingImageView extends ImageView {
 		protected void onPostExecute(Drawable result) {
 			super.onPostExecute(result);
 			
-			// TODO: what to do if an download handler
-			// is not set. Make the exception more visible.
-			if (e != null) {
-				if (mDownloadHandler != null){
-					mDownloadHandler.onException(e);
-				}
+			// TODO: what to do if a download handler
+			// is not set. Make exceptions more visible.
+			if(e != null){
+				notifyErrorIfExists();
 			} else {
+				// If there is an error thrown from
+				// download task, we should not try
+				// to set the image
+				
 				if (mDownloadHandler != null){
 					mDownloadHandler.onDrawableDownloaded(result);
 				}
-				setImageDrawable(result);
+				
+				// Any possible exception like
+				// OutOfMemmoryException fits here.
+				try {
+					setImageDrawable(result);
+				} catch (Exception e) {
+					this.e = e;
+				}
+				notifyErrorIfExists();
+			}
+		}
+		
+		private void notifyErrorIfExists(){
+			if(e != null && mDownloadHandler != null){
+				mDownloadHandler.onException(e);
 			}
 		}
 	}
