@@ -24,7 +24,7 @@ import android.widget.ImageView;
 public class LoadingImageView extends ImageView {
 	
 	private static DrawableCache mCache;
-	private DownloadHandler mDownloadHandler;
+	private OnDownloadListener mOnDownloadListener;
 	private AsyncTask<String, Boolean, Drawable> mCurrentBackgroundTask;
 	final private Object taskLock = new Object(); 
 	
@@ -74,8 +74,8 @@ public class LoadingImageView extends ImageView {
 	 *
 	 * @param downloadHandlerImpl the new download handler
 	 */
-	public void setDownloadHandler(DownloadHandler downloadHandlerImpl){
-		this.mDownloadHandler = downloadHandlerImpl;
+	public void setDownloadHandler(OnDownloadListener onDownloadListenerImpl){
+		this.mOnDownloadListener = onDownloadListenerImpl;
 	}
 	
 	/**
@@ -217,7 +217,7 @@ public class LoadingImageView extends ImageView {
 	 * to subscribe onDrawableDownloaded and onException
 	 * states.
 	 */
-	public interface DownloadHandler {
+	public interface OnDownloadListener {
 		
 		/**
 		 * Will be called once a drawable is downloaded
@@ -277,8 +277,8 @@ public class LoadingImageView extends ImageView {
 				// download task, we should not try
 				// to set the image
 				
-				if (mDownloadHandler != null){
-					mDownloadHandler.onDrawableDownloaded(result);
+				if (mOnDownloadListener != null){
+					mOnDownloadListener.onDrawableDownloaded(result);
 				}
 				
 				// Any possible exception like
@@ -293,8 +293,8 @@ public class LoadingImageView extends ImageView {
 		}
 		
 		private void notifyErrorIfExists(){
-			if(e != null && mDownloadHandler != null){
-				mDownloadHandler.onException(e);
+			if(e != null && mOnDownloadListener != null){
+				mOnDownloadListener.onException(e);
 			}
 		}
 	}

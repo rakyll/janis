@@ -16,7 +16,7 @@ import android.widget.ListView;
  */
 public class LoadingListView extends ListView {
 	
-	private OnMoreHandler mOnMoreHandler;
+	private OnMoreListener mOnMoreListener;
 	private OnScrollListener mOnScrollListener;
 	private BackgroundTask mCurrentBackgroundTask;
 	final Object taskLock = new Object();
@@ -120,8 +120,8 @@ public class LoadingListView extends ListView {
 	 *
 	 * @return the on more handler
 	 */
-	public OnMoreHandler getOnMoreHandler() {
-		return mOnMoreHandler;
+	public OnMoreListener getOnMoreListener() {
+		return mOnMoreListener;
 	}
 
 	/**
@@ -138,8 +138,8 @@ public class LoadingListView extends ListView {
 	 *
 	 * @param onMoreHandler
 	 */
-	public void setOnMoreHandler(OnMoreHandler onMoreHandler) {
-		mOnMoreHandler = onMoreHandler;
+	public void setOnMoreHandler(OnMoreListener onMoreListener) {
+		mOnMoreListener = onMoreListener;
 	}
 	
 	/**
@@ -156,7 +156,7 @@ public class LoadingListView extends ListView {
 	 * to set actions when list view scrolled to the
 	 * bottom.
 	 */
-	public interface OnMoreHandler {
+	public interface OnMoreListener {
 		
 		/**
 		 * Executed in the main thread before run
@@ -193,16 +193,16 @@ public class LoadingListView extends ListView {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			if(mOnMoreHandler != null){
-				mOnMoreHandler.run(LoadingListView.this);
+			if(mOnMoreListener != null){
+				mOnMoreListener.run(LoadingListView.this);
 			}
 			return null;
 		}
 		
 		@Override
 		protected void onPostExecute(Void result) {
-			if(mOnMoreHandler != null){
-				mOnMoreHandler.onPostExecute(LoadingListView.this);
+			if(mOnMoreListener != null){
+				mOnMoreListener.onPostExecute(LoadingListView.this);
 			}
 			super.onPostExecute(result);
 		}
@@ -210,8 +210,8 @@ public class LoadingListView extends ListView {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			if(mOnMoreHandler != null){
-				mOnMoreHandler.onPreExecute(LoadingListView.this);
+			if(mOnMoreListener != null){
+				mOnMoreListener.onPreExecute(LoadingListView.this);
 			}
 		}
 	}
