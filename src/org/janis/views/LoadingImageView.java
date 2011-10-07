@@ -226,14 +226,16 @@ public class LoadingImageView extends ImageView {
 		 *
 		 * @param drawable The downloaded drawable.
 		 */
-		void onDrawableDownloaded(Drawable drawable);
+		void onDrawableDownloaded(LoadingImageView loadingImageView, 
+				Drawable drawable);
 		
 		/**
 		 * On exception.
 		 *
 		 * @param e The thrown exception during the download.
 		 */
-		void onException(Exception e);
+		void onException(LoadingImageView loadingImageView,
+				Exception e);
 	}
 	
 	/**
@@ -278,7 +280,8 @@ public class LoadingImageView extends ImageView {
 				// to set the image
 				
 				if (mOnDownloadListener != null){
-					mOnDownloadListener.onDrawableDownloaded(result);
+					mOnDownloadListener.onDrawableDownloaded(
+							LoadingImageView.this, result);
 				}
 				
 				// Any possible exception like
@@ -294,7 +297,8 @@ public class LoadingImageView extends ImageView {
 		
 		private void notifyErrorIfExists(){
 			if(e != null && mOnDownloadListener != null){
-				mOnDownloadListener.onException(e);
+				mOnDownloadListener.onException(
+						LoadingImageView.this, e);
 			}
 		}
 	}
